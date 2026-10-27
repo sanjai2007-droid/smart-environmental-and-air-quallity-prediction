@@ -1,8 +1,5 @@
 import os
-import pickle
-import numpy as np
 from datetime import datetime
-from tensorflow.keras.models import load_model
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE, '..', 'models')
@@ -19,12 +16,20 @@ def load_artifacts():
         return True
 
     model_path = os.path.join(MODEL_DIR, 'air_quality_dnn.h5')
-    if not os.path.exists(model_path):
+    scaler_path = os.path.join(MODEL_DIR, 'scaler.pkl')
+    labels_path = os.path.join(MODEL_DIR, 'labels.pkl')
+    if not all(os.path.exists(path) for path in (model_path, scaler_path, labels_path)):
         return False
 
+    import pickle
+    import numpy as np
+    from tensorflow.keras.models import load_model
+
     model = load_model(model_path)
-    scaler = pickle.load(open(os.path.join(MODEL_DIR, 'scaler.pkl'), 'rb'))
-    labels = pickle.load(open(os.path.join(MODEL_DIR, 'labels.pkl'), 'rb'))
+    with open(scaler_path, 'rb') as scaler_file:
+        scaler = pickle.load(scaler_file)
+    with open(labels_path, 'rb') as labels_file:
+        labels = pickle.load(labels_file)
     return True
 
 
